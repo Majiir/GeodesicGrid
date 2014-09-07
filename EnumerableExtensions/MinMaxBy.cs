@@ -7,112 +7,49 @@ namespace GeodesicGrid.EnumerableExtensions
     {
         public static T MinBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector)
         {
-            TKey key;
-            return MinBy(sequence, selector, out key);
+            return minByImpl(sequence, selector, Comparer<TKey>.Default, true);
         }
 
         public static T MaxBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector)
         {
-            TKey key;
-            return MaxBy(sequence, selector, out key);
+            return minByImpl(sequence, selector, new ReverseComparer<TKey>(Comparer<TKey>.Default), true);
         }
 
         public static T MinBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, IComparer<TKey> comparer)
         {
-            TKey key;
-            return MinBy(sequence, selector, out key, comparer);
+            if (comparer == null) { throw new ArgumentNullException("comparer"); }
+            return minByImpl(sequence, selector, comparer, true);
         }
 
         public static T MaxBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, IComparer<TKey> comparer)
         {
-            TKey key;
-            return MaxBy(sequence, selector, out key, comparer);
-        }
-
-        public static T MinBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey minKey)
-        {
-            return minByImpl(sequence, selector, out minKey, Comparer<TKey>.Default);
-        }
-
-        public static T MaxBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey maxKey)
-        {
-            return minByImpl(sequence, selector, out maxKey, new ReverseComparer<TKey>(Comparer<TKey>.Default));
-        }
-
-        public static T MinBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey minKey, IComparer<TKey> comparer)
-        {
             if (comparer == null) { throw new ArgumentNullException("comparer"); }
-            return minByImpl(sequence, selector, out minKey, comparer);
-        }
-
-        public static T MaxBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey maxKey, IComparer<TKey> comparer)
-        {
-            if (comparer == null) { throw new ArgumentNullException("comparer"); }
-            return minByImpl(sequence, selector, out maxKey, new ReverseComparer<TKey>(comparer));
+            return minByImpl(sequence, selector, new ReverseComparer<TKey>(comparer), true);
         }
 
         public static T MinByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector)
         {
-            TKey key;
-            return MinByOrDefault(sequence, selector, out key);
+            return minByImpl(sequence, selector, Comparer<TKey>.Default, false);
         }
 
         public static T MaxByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector)
         {
-            TKey key;
-            return MaxByOrDefault(sequence, selector, out key);
+            return minByImpl(sequence, selector, new ReverseComparer<TKey>(Comparer<TKey>.Default), false);
         }
 
         public static T MinByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, IComparer<TKey> comparer)
         {
-            TKey key;
-            return MinByOrDefault(sequence, selector, out key, comparer);
+            if (comparer == null) { throw new ArgumentNullException("comparer"); }
+            return minByImpl(sequence, selector, comparer, false);
         }
 
         public static T MaxByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, IComparer<TKey> comparer)
         {
-            TKey key;
-            return MaxByOrDefault(sequence, selector, out key, comparer);
-        }
-
-        public static T MinByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey minKey)
-        {
-            return minByOrDefaultImpl(sequence, selector, out minKey, Comparer<TKey>.Default);
-        }
-
-        public static T MaxByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey maxKey)
-        {
-            return minByOrDefaultImpl(sequence, selector, out maxKey, new ReverseComparer<TKey>(Comparer<TKey>.Default));
-        }
-
-        public static T MinByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey minKey, IComparer<TKey> comparer)
-        {
             if (comparer == null) { throw new ArgumentNullException("comparer"); }
-            return minByOrDefaultImpl(sequence, selector, out minKey, comparer);
+            return minByImpl(sequence, selector, new ReverseComparer<TKey>(comparer), false);
         }
 
-        public static T MaxByOrDefault<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> selector, out TKey maxKey, IComparer<TKey> comparer)
-        {
-            if (comparer == null) { throw new ArgumentNullException("comparer"); }
-            return minByOrDefaultImpl(sequence, selector, out maxKey, new ReverseComparer<TKey>(comparer));
-        }
-
-        private static T minByImpl<T, TKey>(IEnumerable<T> sequence, Func<T, TKey> selector, out TKey key, IComparer<TKey> comparer)
-        {
-            return minByOrEmpty(sequence, selector, out key, comparer, throwOnEmpty<T>);
-        }
-
-        private static T minByOrDefaultImpl<T, TKey>(IEnumerable<T> sequence, Func<T, TKey> selector, out TKey key, IComparer<TKey> comparer)
-        {
-            return minByOrEmpty(sequence, selector, out key, comparer, () => default(T));
-        }
-
-        private static T throwOnEmpty<T>()
-        {
-            throw new InvalidOperationException("Sequence is empty");
-        }
-
-        private static T minByOrEmpty<T, TKey>(IEnumerable<T> sequence, Func<T, TKey> selector, out TKey key, IComparer<TKey> comparer, Func<T> emptyHandler)
+        private static T minByImpl<T, TKey>(IEnumerable<T> sequence, Func<T, TKey> selector, IComparer<TKey> comparer, bool throwOnEmpty)
         {
             if (sequence == null) { throw new ArgumentNullException("sequence"); }
             if (selector == null) { throw new ArgumentNullException("selector"); }
@@ -121,9 +58,8 @@ namespace GeodesicGrid.EnumerableExtensions
             {
                 if (!enumerator.MoveNext())
                 {
-                    T value = emptyHandler();
-                    key = selector(value);
-                    return value;
+                    if (throwOnEmpty) { throw new InvalidOperationException("Sequence is empty"); }
+                    return default(T);
                 }
 
                 T min = enumerator.Current;
@@ -140,7 +76,6 @@ namespace GeodesicGrid.EnumerableExtensions
                     }
                 }
 
-                key = minKey;
                 return min;
             }
         }
