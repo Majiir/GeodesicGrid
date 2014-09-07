@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Majiir")]
 [assembly: AssemblyProduct("GeodesicGrid")]
-[assembly: AssemblyCopyright("Copyright © Majiir 2014")]
+[assembly: AssemblyCopyright("Copyright © Majiir 2012-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
