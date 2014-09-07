@@ -48,14 +48,15 @@
     <Compile Include="CellSet.cs" />
     <Compile Include="ChildType.cs" />
     <Compile Include="IntMath.cs" />
+    <Compile Include="LicenseSentinel.cs" />
     <Compile Include="Triangle.cs" />
     <Compile Include="TriangleHit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GeodesicGrid-LICENSE.txt">
+    <EmbeddedResource Include="GeodesicGrid-LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

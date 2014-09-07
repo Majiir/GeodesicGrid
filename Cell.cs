@@ -10,6 +10,11 @@ namespace GeodesicGrid
 {
     public struct Cell : IEquatable<Cell>
     {
+        static Cell()
+        {
+            LicenseSentinel.Run();
+        }
+
         private readonly uint index;
 
         public Cell(uint index)
