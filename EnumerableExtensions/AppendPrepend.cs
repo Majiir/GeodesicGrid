@@ -39,27 +39,26 @@ namespace GeodesicGrid.EnumerableExtensions
 
             public IEnumerator<T> GetEnumerator()
             {
-                var appends = new Stack<AppendPrependIterator<T>>();
-                IEnumerable<T> seq = this;
+                var appends = new Stack<T>();
+                var iterator = this;
+                IEnumerable<T> seq;
 
-                while (true)
+                do
                 {
-                    var iterator = seq as AppendPrependIterator<T>;
-                    if (iterator == null) { break; }
-
                     if (iterator is AppendIterator<T>)
                     {
-                        appends.Push(iterator);
+                        appends.Push(iterator.element);
                     }
                     else // (iterator is PrependIterator<T>)
                     {
                         yield return iterator.element;
                     }
                     seq = iterator.sequence;
-                }
+                    iterator = seq as AppendPrependIterator<T>;
+                } while (iterator != null);
 
                 foreach (var e in seq) { yield return e; }
-                while (appends.Count > 0) { yield return appends.Pop().element; }
+                while (appends.Count > 0) { yield return appends.Pop(); }
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
